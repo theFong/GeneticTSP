@@ -30,9 +30,11 @@ TEST_CASE("Full file test cases", "[student]")
 {
 	SECTION("input/locations.txt 8 5 10 1337")
 	{
+        //"/Users/AlecFong/GoogleDrive/WorkStation/itp435/pa2-theFong/input/locations.txt"
+//        "input/locations.txt"
 		const char* argv[] = {
 			"tests/tests",
-			"input/locations.txt",
+			"../../input/locations.txt",
 			"8",
 			"5",
 			"10",
