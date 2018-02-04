@@ -58,17 +58,18 @@ Population GenerateInitPop(int locationSize, int popSize, std::mt19937 &randomGe
     Population p;
     std::vector<std::vector<int>> pops(popSize);
     p.mMembers = pops;
-    
+
     std::vector<int> indices(locationSize, 0);
     std::transform(indices.begin()+1, indices.end(), indices.begin(),indices.begin()+1,
                    [](int current, int behind) -> int{ return behind+1;} );
-    
+
     // nested transform -> iterate over mMembers passing in size nested transform creates indicee vector and shuffles it
     std::transform(p.mMembers.begin(),p.mMembers.end(),p.mMembers.begin(),
-                   [&randomGen, locationSize, indices](std::vector<int> x) -> std::vector<int>
+                   [&randomGen, indices](std::vector<int> x) -> std::vector<int>
     {
-        std::shuffle(indices.begin()+1, indices.end(), randomGen);
-        return indices;
+        auto indicesCopy = indices;
+        std::shuffle(indicesCopy.begin()+1, indicesCopy.end(), randomGen);
+        return indicesCopy;
     });
     return p;
 }
@@ -121,12 +122,12 @@ std::vector<std::pair<int, double>> CalcFitness(Population pop, std::vector<Loca
         // create matrix of adj distances
         std::vector<double> adj_diff(mem.size(),0);
         // calc adj dist
-        std::adjacent_difference(mem.begin(), mem.end(), mem.begin(), [locs](int loc1, int loc2) -> double
+        std::adjacent_difference(mem.begin(), mem.end(), adj_diff.begin(), [locs](int loc2, int loc1) -> double
         {
                                      return Distance(locs[loc1].mLatitude,locs[loc1].mLongitude, locs[loc2].mLatitude, locs[loc2].mLongitude);
         });
         // sum the distances
-        double sumDist = std::accumulate(adj_diff.begin(), adj_diff.end(), 0);
+        double sumDist = std::accumulate(adj_diff.begin(), adj_diff.end(), 0.0);
         return std::pair<int, double>(i,sumDist);
     });
     return fitness;
@@ -134,7 +135,21 @@ std::vector<std::pair<int, double>> CalcFitness(Population pop, std::vector<Loca
 
 void WriteFit(std::vector<std::pair<int, double>> fitnesses)
 {
+    std::ofstream oFile;
+    std::string fitnessStr = "FITNESS: ";
     
+    oFile = std::ofstream("log.txt", std::ofstream::out|std::ofstream::app);
+    
+    
+    if (oFile.is_open())
+    {
+        oFile << fitnessStr << "\n";
+        for (int i = 0; i < fitnesses.size(); ++i)
+        {
+            
+            oFile << fitnesses[i].first << ":" << fitnesses[i].second << "\n";
+        }
+    }
 }
 
 double Deg2rad(double deg) {
@@ -150,5 +165,6 @@ double Distance(double lat1d, double lon1d, double lat2d, double lon2d) {
     lon2r = Deg2rad(lon2d);
     u = sin((lat2r - lat1r)/2);
     v = sin((lon2r - lon1r)/2);
-    return 2.0 * 6371 * asin(sqrt(u * u + cos(lat1r) * cos(lat2r) * v * v));
+    // km 6371
+    return 2.0 * 3961 * asin(sqrt(u * u + cos(lat1r) * cos(lat2r) * v * v));
 }

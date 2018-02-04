@@ -2,7 +2,7 @@
 #include <iostream>
 #include <random>
 #include "TSP.h"
-//#include <fstream>
+#include <fstream>
 #include <algorithm>
 
 void ProcessCommandArgs(int argc, const char* argv[])
@@ -21,7 +21,7 @@ void ProcessCommandArgs(int argc, const char* argv[])
     
     WriteGen(initPop,0);
     
-    auto fitnesses = CalcFitness(initPop);
+    auto fitnesses = CalcFitness(initPop, locations);
     
     WriteFit(fitnesses);
 //    WritePair(initPop,0);
