@@ -6,6 +6,7 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include <random>
 
 //#include <unistd.h>
 //#define GetCurrentDir getcwd
@@ -110,10 +111,7 @@ std::vector<std::pair<int, double>> CalcFitness(Population pop, std::vector<Loca
 {
     std::vector<std::pair<int, double>> fitness(pop.mMembers.size());
     
-    // create a vector of indices
-    std::vector<int> indices(pop.mMembers.size(), 0);
-    std::transform(indices.begin()+1, indices.end(), indices.begin(),indices.begin()+1,
-                   [](int current, int behind) -> int{ return behind+1;} );
+    std::vector<int> indices = CreateIndices(pop.mMembers.size());
     // iterate over members of pop calculate each haversine distance
     std::transform(pop.mMembers.begin(), pop.mMembers.end(), indices.begin(), fitness.begin(), [locs](std::vector<int> mem, int i) -> std::pair<int, double>
     {
@@ -167,4 +165,81 @@ double Distance(double lat1d, double lon1d, double lat2d, double lon2d) {
     v = sin((lon2r - lon1r)/2);
     // km 6371
     return 2.0 * 3961 * asin(sqrt(u * u + cos(lat1r) * cos(lat2r) * v * v));
+}
+
+std::vector<std::pair<int, int>> SelectPairs(std::vector<std::pair<int, double>> fitnesses, std::mt19937 &gen)
+{
+    std::vector<std::pair<int, int>> selectedPairs(fitnesses.size());
+    // sort fitness vec ascending
+    std::vector<std::pair<int, double>> ascFitness = fitnesses;
+    std::sort(ascFitness.begin(), ascFitness.end(),
+              [](std::pair<int, int> a,std::pair<int, int> b) -> bool
+    {
+        return a.second < b.second;
+    });
+    
+    // create vector of uniform probability
+    std::vector<double> prob(fitnesses.size(), 1.0/double(fitnesses.size()));
+    
+    // two individs with best fitness prob 6x, remainder of top half 3x, rest remain
+    std::vector<int> indices = CreateIndices(fitnesses.size());
+    std::transform(ascFitness.begin(), ascFitness.end(), indices.begin(), prob.begin(),
+                   [prob](std::pair<int, int> p,int i) -> double
+                      {
+                          if (i < 2) {
+                              return 6.0*prob[i];
+                          } else if(i < prob.size()/2)
+                          {
+                              return 3.0*prob[i];
+                          } else {
+                              return 1.0*prob[i];
+                          }
+                      });
+    
+    // normalize probs
+    double sumToNorm = std::accumulate(prob.begin(), prob.end(), 0.0);
+    std::transform(prob.begin(), prob.end(), prob.begin(), [sumToNorm](double p) -> double
+                   {
+                       return p/sumToNorm;
+                   });
+    
+    // select pairs:
+        // create uniform dist
+    std::uniform_real_distribution<double> uDis(0.0,1.0);
+        // Generate a random double for the first parent, and use it to select an individual, from the
+        // probability vector
+    // memoize sums by creating vec with sum up to
+    std::vector<double> iSums(prob.size(),0);
+    iSums[0] = prob[0];
+    std::transform(prob.begin()+1, prob.end(), iSums.begin(), iSums.begin()+1,
+                   [](double curr, double prev) -> double
+    {
+                       return prev+curr;
+    });
+    
+    std::transform(indices.begin(), indices.end(), selectedPairs.begin(),
+                   [&uDis, &gen, iSums, indices](int i)-> std::pair<int, int>
+                   {
+                       double sumThresh = uDis(gen);
+                       auto iSumsCopy = iSums;
+                       auto indicesCopy = indices;
+                       int mate = *std::find_if(indicesCopy.begin(), indicesCopy.end(), [sumThresh, iSumsCopy](int i) -> bool
+                       {
+                           return (sumThresh <= iSumsCopy[i]);
+                       });
+                       std::pair<int, int> pair(i, mate);
+                       return pair;
+                   });
+    return selectedPairs;
+}
+
+std::vector<int> CreateIndices(int n)
+{
+    std::vector<int> indices(n, 0);
+    std::transform(indices.begin()+1, indices.end(), indices.begin(),indices.begin()+1,
+                   [](int current, int behind) -> int
+                    {
+                        return behind+1;
+                    } );
+    return indices;
 }

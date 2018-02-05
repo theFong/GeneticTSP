@@ -24,6 +24,7 @@ void ProcessCommandArgs(int argc, const char* argv[])
     auto fitnesses = CalcFitness(initPop, locations);
     
     WriteFit(fitnesses);
+    auto pairs = SelectPairs(fitnesses, randomGen);
 //    WritePair(initPop,0);
     
 }

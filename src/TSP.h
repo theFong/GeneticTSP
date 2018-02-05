@@ -28,3 +28,7 @@ double Distance(double lat1d, double lon1d, double lat2d, double lon2d);
 void WriteFit(std::vector<std::pair<int, double>> fitnesses);
 
 double Deg2rad(double deg);
+
+std::vector<std::pair<int, int>> SelectPairs(std::vector<std::pair<int, double>> fitnesses, std::mt19937 &gen);
+
+std::vector<int> CreateIndices(int n);
