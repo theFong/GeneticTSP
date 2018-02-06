@@ -18,13 +18,16 @@ void ProcessCommandArgs(int argc, const char* argv[])
     auto locations = ReadLocations(inputFile);
     
     auto initPop = GenerateInitPop(locations.size(), popSize ,randomGen);
-    
     WriteGen(initPop,0);
     
     auto fitnesses = CalcFitness(initPop, locations);
-    
     WriteFit(fitnesses);
+    
     auto pairs = SelectPairs(fitnesses, randomGen);
-//    WritePair(initPop,0);
+    WritePair(pairs);
+    
+    auto nexGen = CrossOver(pairs, initPop, randomGen);
+    
+    auto mutated = Mutate(nexGen, mutationChance, randomGen);
     
 }
