@@ -11,7 +11,7 @@
 //#include <unistd.h>
 //#define GetCurrentDir getcwd
 
-std::vector<Location> ReadLocations(std::string &fileName)
+std::vector<Location> ReadLocations(const std::string &fileName)
 {
     // working dir pa2-theFong/tests/Debug
     
@@ -74,7 +74,7 @@ Population GenerateInitPop(int locationSize, int popSize, std::mt19937 &randomGe
     return p;
 }
 
-void WriteGen(Population pop, int gen)
+void WriteGen(const Population &pop, int gen)
 {
     std::ofstream oFile;
     std::string genString = "GENERATION: "+ std::to_string(gen);
@@ -107,7 +107,7 @@ void WriteGen(Population pop, int gen)
     
 }
 
-std::vector<std::pair<int, double>> CalcFitness(Population pop, std::vector<Location> locs)
+std::vector<std::pair<int, double>> CalcFitness(const Population &pop,const std::vector<Location> &locs)
 {
     std::vector<std::pair<int, double>> fitness(pop.mMembers.size());
     
@@ -131,7 +131,7 @@ std::vector<std::pair<int, double>> CalcFitness(Population pop, std::vector<Loca
     return fitness;
 }
 
-void WriteFit(std::vector<std::pair<int, double>> fitnesses)
+void WriteFit(const std::vector<std::pair<int, double>> &fitnesses)
 {
     std::ofstream oFile;
     std::string fitnessStr = "FITNESS: ";
@@ -168,7 +168,7 @@ double Distance(double lat1d, double lon1d, double lat2d, double lon2d) {
     return 2.0 * 3961 * asin(sqrt(u * u + cos(lat1r) * cos(lat2r) * v * v));
 }
 
-std::vector<std::pair<int, int>> SelectPairs(std::vector<std::pair<int, double>> fitnesses, std::mt19937 &gen)
+std::vector<std::pair<int, int>> SelectPairs(const std::vector<std::pair<int, double>> &fitnesses, std::mt19937 &gen)
 {
     std::vector<std::pair<int, int>> selectedPairs(fitnesses.size());
     // sort fitness vec ascending
@@ -179,23 +179,38 @@ std::vector<std::pair<int, int>> SelectPairs(std::vector<std::pair<int, double>>
         return a.second < b.second;
     });
     
-    // create vector of uniform probability
-    std::vector<double> prob(fitnesses.size(), 1.0/double(fitnesses.size()));
+    // create prob vec
+    std::vector<double> prob(fitnesses.size(), 0.0);
     
-    // two individs with best fitness prob 6x, remainder of top half 3x, rest remain
     std::vector<int> indices = CreateIndices(fitnesses.size());
-    std::transform(ascFitness.begin(), ascFitness.end(), indices.begin(), prob.begin(),
-                   [prob](std::pair<int, int> p,int i) -> double
-                      {
-                          if (i < 2) {
-                              return 6.0*prob[i];
-                          } else if(i < prob.size()/2)
-                          {
-                              return 3.0*prob[i];
-                          } else {
-                              return 1.0*prob[i];
-                          }
-                      });
+    
+    // create uniform prob then -> two individs with best fitness prob 6x, remainder of top half 3x, rest remain
+    std::transform(ascFitness.begin(), ascFitness.end(), indices.begin(), ascFitness.begin(),
+                   [fitnesses](std::pair<int, double> fit, int i) -> std::pair<int, double>
+                   {
+                       if (i < 2) {
+                           return std::pair<int, double>(fit.first, 6.0*(1.0/double(fitnesses.size())));
+                       } else if(i < fitnesses.size()/2)
+                       {
+                           return std::pair<int, double>(fit.first, 3.0*(1.0/double(fitnesses.size())));
+                       } else {
+                           return std::pair<int, double>(fit.first, 1.0*(1.0/double(fitnesses.size())));
+                       }
+                   });
+    
+//     "de-sort" to original order
+    std::sort(ascFitness.begin(), ascFitness.end(),
+                  [](std::pair<int, double> p1, std::pair<int, double> p2) -> bool
+                  {
+                      return p1.first < p2.first;
+
+                  });
+    // put probs into vector
+    std::transform(ascFitness.begin(), ascFitness.end(), prob.begin(),
+                   [](std::pair<int, double> p) -> double
+                    {
+                        return p.second;
+                    });
     
     // normalize probs
     double sumToNorm = std::accumulate(prob.begin(), prob.end(), 0.0);
@@ -203,6 +218,8 @@ std::vector<std::pair<int, int>> SelectPairs(std::vector<std::pair<int, double>>
                    {
                        return p/sumToNorm;
                    });
+    
+
     
     // select pairs:
         // create uniform dist
@@ -224,23 +241,23 @@ std::vector<std::pair<int, int>> SelectPairs(std::vector<std::pair<int, double>>
                        auto iSumsCopy = iSums;
                        auto indicesCopy = indices;
                        // find first mate
-                       int mateInd1 = *std::find_if(indicesCopy.begin(), indicesCopy.end(), [sumThresh, iSumsCopy](int i) -> bool
+                       int mateInd1 = *std::find_if(indicesCopy.begin(), indicesCopy.end(), [sumThresh, iSumsCopy](int ind) -> bool
                        {
-                           return (sumThresh <= iSumsCopy[i]);
+                           return (sumThresh <= iSumsCopy[ind]);
                        });
                        sumThresh = uDis(gen);
                        // find second mate
-                       int mateInd2 = *std::find_if(indicesCopy.begin(), indicesCopy.end(), [sumThresh, iSumsCopy](int i) -> bool
+                       int mateInd2 = *std::find_if(indicesCopy.begin(), indicesCopy.end(), [sumThresh, iSumsCopy](int ind) -> bool
                                                  {
-                                                     return (sumThresh <= iSumsCopy[i]);
+                                                     return (sumThresh <= iSumsCopy[ind]);
                                                  });
-                       std::pair<int, int> pair(ascFitness[mateInd1].first, ascFitness[mateInd2].first);
+                       std::pair<int, int> pair(mateInd1, mateInd2);
                        return pair;
                    });
     return selectedPairs;
 }
 
-void WritePair(std::vector<std::pair<int, int>> pairs)
+void WritePair(const std::vector<std::pair<int, int>> &pairs)
 {
     std::ofstream oFile;
     std::string pairStr = "SELECTED PAIRS:";
@@ -260,7 +277,7 @@ void WritePair(std::vector<std::pair<int, int>> pairs)
     }
 }
 
-Population CrossOver(std::vector<std::pair<int, int>> pairs, Population pop, std::mt19937 &gen)
+Population CrossOver(const std::vector<std::pair<int, int>> &pairs,const Population &pop, std::mt19937 &gen)
 {
     Population newPop;
     newPop.mMembers = std::vector<std::vector<int>>(pop.mMembers.size());
@@ -296,7 +313,7 @@ Population CrossOver(std::vector<std::pair<int, int>> pairs, Population pop, std
     return newPop;
 }
 
-Population Mutate(Population pop, int mutationChance, std::mt19937 &gen)
+Population Mutate(const Population &pop, int mutationChance, std::mt19937 &gen)
 {
     Population mutatedPop = pop;
     double mutationThresh = double(mutationChance)/100.0;
@@ -319,7 +336,7 @@ Population Mutate(Population pop, int mutationChance, std::mt19937 &gen)
     return mutatedPop;
 }
 
-std::pair<int, double> GetSolution(std::vector<std::pair<int, double>> fitnesses)
+std::pair<int, double> GetSolution(const std::vector<std::pair<int, double>> &fitnesses)
 {
     return *std::min_element(fitnesses.begin(), fitnesses.end(),
                             [](std::pair<int, double> a, std::pair<int, double> b) -> bool
@@ -328,7 +345,7 @@ std::pair<int, double> GetSolution(std::vector<std::pair<int, double>> fitnesses
                             });
 }
 
-void WriteSolution(std::pair<int, double> solution, Population pop, std::vector<Location> locs)
+void WriteSolution(const std::pair<int, double> &solution,const Population &pop,const std::vector<Location> &locs)
 {
     std::ofstream oFile;
     std::string solStr = "SOLUTION:";
