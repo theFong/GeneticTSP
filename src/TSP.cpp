@@ -207,8 +207,7 @@ std::vector<std::pair<int, int>> SelectPairs(std::vector<std::pair<int, double>>
     // select pairs:
         // create uniform dist
     std::uniform_real_distribution<double> uDis(0.0,1.0);
-        // Generate a random double for the first parent, and use it to select an individual, from the
-        // probability vector
+    
     // memoize sums by creating vec with sum up to i
     std::vector<double> iSums(prob.size(),0);
     iSums[0] = prob[0];
@@ -318,6 +317,37 @@ Population Mutate(Population pop, int mutationChance, std::mt19937 &gen)
     
     
     return mutatedPop;
+}
+
+std::pair<int, double> GetSolution(std::vector<std::pair<int, double>> fitnesses)
+{
+    return *std::min_element(fitnesses.begin(), fitnesses.end(),
+                            [](std::pair<int, double> a, std::pair<int, double> b) -> bool
+                            {
+                                return a.second < b.second;
+                            });
+}
+
+void WriteSolution(std::pair<int, double> solution, Population pop, std::vector<Location> locs)
+{
+    std::ofstream oFile;
+    std::string solStr = "SOLUTION:";
+    
+    oFile = std::ofstream("log.txt", std::ofstream::out|std::ofstream::app);
+    
+    
+    if (oFile.is_open())
+    {
+        oFile << solStr << "\n";
+        for (int i = 0; i < pop.mMembers[solution.first].size(); ++i)
+        {
+            
+            oFile << locs[pop.mMembers[solution.first][i]].mName << "\n";
+        }
+        
+        oFile << "DISTANCE: " << solution.second << " " << "miles";
+        oFile.close();
+    }
 }
 
 std::vector<int> CreateIndices(int n)

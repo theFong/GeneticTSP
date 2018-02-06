@@ -38,3 +38,7 @@ void WritePair(std::vector<std::pair<int, int>> pairs);
 Population CrossOver(std::vector<std::pair<int, int>> pairs, Population pop,  std::mt19937 &gen);
 
 Population Mutate(Population pop, int mutationChance, std::mt19937 &gen);
+
+std::pair<int, double> GetSolution(std::vector<std::pair<int, double>> fitnesses);
+
+void WriteSolution(std::pair<int, double> solution,Population pop, std::vector<Location> locs);
