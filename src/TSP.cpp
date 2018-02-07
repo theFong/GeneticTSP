@@ -174,7 +174,7 @@ std::vector<std::pair<int, int>> SelectPairs(const std::vector<std::pair<int, do
     // sort fitness vec ascending
     std::vector<std::pair<int, double>> ascFitness = fitnesses;
     std::sort(ascFitness.begin(), ascFitness.end(),
-              [](std::pair<int, int> a,std::pair<int, int> b) -> bool
+              [](const auto& a, const auto& b) -> bool
     {
         return a.second < b.second;
     });
