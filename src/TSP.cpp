@@ -153,7 +153,7 @@ void WriteFit(const std::vector<std::pair<int, double>> &fitnesses)
 
 double Deg2rad(double deg) {
     // deg to rad const
-    return (deg * .0174533);
+    return deg*(.0174533);
 }
 
 double Distance(double lat1d, double lon1d, double lat2d, double lon2d) {
@@ -286,23 +286,26 @@ Population CrossOver(const std::vector<std::pair<int, int>> &pairs,const Populat
                    [&gen, pop](std::pair<int, int> inPair) -> std::vector<int>
                    {
                        std::uniform_int_distribution<int> uDis(1,pop.mMembers.size()-2);
-                       int crossIndex = uDis(gen);
                        std::uniform_int_distribution<int> zeroOneUDis(0,1);
+                       
+                       int crossIndex = uDis(gen);
                        int orderSelect = zeroOneUDis(gen);
                        
-                       int parentA, parentB;
-                       if (orderSelect) {
-                           parentA = inPair.first;
-                           parentB = inPair.second;
+                       
+                       int parent1, parent2;
+                       if (orderSelect)
+                       {
+                           parent1 = inPair.first;
+                           parent2 = inPair.second;
                        } else {
-                           parentA = inPair.second;
-                           parentB = inPair.first;
+                           parent1 = inPair.second;
+                           parent2 = inPair.first;
                        }
                        
                        std::vector<int> child(pop.mMembers[0].size());
-                       std::copy_n(pop.mMembers[parentA].begin(), crossIndex+1, child.begin());
+                       std::copy_n(pop.mMembers[parent1].begin(), crossIndex+1, child.begin());
                        // copy over if not in it
-                       std::copy_if(pop.mMembers[parentB].begin(), pop.mMembers[parentB].end(), child.begin()+crossIndex+1,
+                       std::copy_if(pop.mMembers[parent2].begin(), pop.mMembers[parent2].end(), child.begin()+crossIndex+1,
                                     [child](int loc) -> bool
                                     {
                                         // make sure its not in list

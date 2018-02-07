@@ -21,7 +21,57 @@ extern bool CheckTextFilesSame(const std::string& fileNameA,
 // (You will want to make multiple test cases with different sections)
 TEST_CASE("Function test cases", "[student]")
 {
-
+//    GenerateInitPop
+    SECTION("GenerateInitPop")
+    {
+        std::mt19937 randomGen = std::mt19937(1337);
+        Population testP = GenerateInitPop(20, 8 ,randomGen);
+        bool test = (testP.mMembers.size() == 8) && (testP.mMembers[0].size() == 20);
+        REQUIRE(test);
+    }
+//    CalcFitness
+    SECTION("CalcFitness")
+    {
+//        std::vector<std::pair<int, double>> CalcFitness(const Population &pop,const std::vector<Location> &locs)
+//        Population p;
+//        p.mMembers = std::vector<std::vector<int>>()
+//        auto testRes = CalcFitness(const Population &pop,const std::vector<Location> &locs)
+    }
+//    Deg2rad
+    SECTION("Deg2rad")
+    {
+        
+    }
+//    Distance
+    SECTION("Distance")
+    {
+        
+    }
+//    SelectPairs
+    SECTION("SelectPairs")
+    {
+        
+    }
+//    CrossOver
+    SECTION("CrossOver")
+    {
+        
+    }
+//    Mutate
+    SECTION("Mutate")
+    {
+        
+    }
+//    GetSolution
+    SECTION("GetSolution")
+    {
+        
+    }
+//    CreateIndices
+    SECTION("CreateIndices")
+    {
+        
+    }
 }
 
 // Provided Complete file test cases
@@ -34,7 +84,7 @@ TEST_CASE("Full file test cases", "[student]")
 //        "input/locations.txt"
 		const char* argv[] = {
 			"tests/tests",
-			"../../input/locations.txt",
+			"input/locations.txt",
 			"8",
 			"5",
 			"10",
