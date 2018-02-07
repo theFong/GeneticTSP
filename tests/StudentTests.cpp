@@ -72,12 +72,30 @@ TEST_CASE("Function test cases", "[student]")
 //    CrossOver
     SECTION("CrossOver")
     {
+        std::vector<std::pair<int,int>>pairs(3);
+        pairs[0] = std::pair<int,int>(0,1);
+        pairs[1] = std::pair<int,int>(1,2);
+        pairs[2] = std::pair<int,int>(1,0);
+        bool test = true;
+        Population inPop;
+        inPop.mMembers = std::vector<std::vector<int>>(3);
+        inPop.mMembers[0] = {0,1,2};
+        inPop.mMembers[0] = {2,1,0};
+        inPop.mMembers[0] = {2,0,1};
+        std::mt19937 randomGen = std::mt19937(1337);
+        
+//        Population p = CrossOver(pairs, inPop, 80, randomGen);
+        REQUIRE(test);
         
     }
 //    Mutate
     SECTION("Mutate")
     {
-        
+        std::mt19937 randomGen = std::mt19937(2);
+        std::vector<int> mem = {0,1,2,3,4,5,6,7,8,9,10};
+        mem = Mutate(mem, 100, randomGen);
+        bool test = mem[7] == 9 && mem[9] == 7;
+        REQUIRE(test);
     }
 //    GetSolution
     SECTION("GetSolution")
