@@ -33,24 +33,41 @@ TEST_CASE("Function test cases", "[student]")
     SECTION("CalcFitness")
     {
 //        std::vector<std::pair<int, double>> CalcFitness(const Population &pop,const std::vector<Location> &locs)
-//        Population p;
-//        p.mMembers = std::vector<std::vector<int>>()
-//        auto testRes = CalcFitness(const Population &pop,const std::vector<Location> &locs)
+        Population p;
+        p.mMembers = std::vector<std::vector<int>>(2);
+        p.mMembers[0] = {0,9,1,10,14,7,8,11,16,18,6,17,4,13,15,2,5,19,12,3};
+        p.mMembers[1] = {0,19,4,12,3,16,7,1,15,2,11,14,13,5,18,8,9,10,6,17};
+        auto locations = ReadLocations("input/locations.txt");
+        auto testRes = CalcFitness(p,locations);
+        bool result = testRes[0].second == 370.9142064216266 && testRes[1].second == 356.92062328756896;
+        REQUIRE(result);
     }
 //    Deg2rad
     SECTION("Deg2rad")
     {
-        
+        double rad = Deg2rad(57.2958);
+        bool test = int(rad) == 1;
+        REQUIRE(test);
     }
 //    Distance
     SECTION("Distance")
     {
-        
+        auto locations = ReadLocations("input/locations.txt");
+        double dist = Distance(locations[0].mLatitude, locations[0].mLongitude,locations[1].mLatitude, locations[1].mLongitude);
+        bool test = (dist == 8.9170522271021948);
+        REQUIRE(test);
     }
 //    SelectPairs
     SECTION("SelectPairs")
     {
-        
+        std::mt19937 randomGen = std::mt19937(1337);
+        std::vector<std::pair<int, double>> pairs(3);
+        pairs[0] = std::pair<int, double>(0,100.0);
+        pairs[1] = std::pair<int, double>(1,150.0);
+        pairs[2] = std::pair<int, double>(2,125.0);
+        auto sel = SelectPairs(pairs, randomGen);
+        bool test = sel[0].first == 2 && sel[1].second == 0 && sel[2].first == 0;
+        REQUIRE(test);
     }
 //    CrossOver
     SECTION("CrossOver")
@@ -65,12 +82,20 @@ TEST_CASE("Function test cases", "[student]")
 //    GetSolution
     SECTION("GetSolution")
     {
-        
+        std::vector<std::pair<int, double>> testFit(3);
+        testFit[0] = std::pair<int, double>(0,150.0);
+        testFit[1] = std::pair<int, double>(0,100.0);
+        testFit[2] = std::pair<int, double>(0,200.0);
+        auto sol = GetSolution(testFit);
+        bool test = sol.second == 100.0;
+        REQUIRE(test);
     }
 //    CreateIndices
     SECTION("CreateIndices")
     {
-        
+        auto inds = CreateIndices(5);
+        bool result = inds.size() == 5;
+        REQUIRE(result);
     }
 }
 

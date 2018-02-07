@@ -35,9 +35,9 @@ std::vector<int> CreateIndices(int n);
 
 void WritePair(const std::vector<std::pair<int, int>> &pairs);
 
-Population CrossOver(const std::vector<std::pair<int, int>> &pairs,const Population &pop,  std::mt19937 &gen);
+Population CrossOver(const std::vector<std::pair<int, int>> &pairs,const Population &pop, int mutationChance, std::mt19937 &gen);
 
-Population Mutate(const Population &pop, int mutationChance, std::mt19937 &gen);
+std::vector<int> Mutate(const std::vector<int> &mem, int mutationChance, std::mt19937 &gen);
 
 std::pair<int, double> GetSolution(const std::vector<std::pair<int, double>> &fitnesses);
 

@@ -55,16 +55,16 @@ void ProcessCommandArgs(int argc, const char* argv[])
                         auto pairs = SelectPairs(fitnesses, randomGen);
                         WritePair(pairs);
                         
-                        auto nexGen = CrossOver(pairs, *curGen, randomGen);
-                        auto mutated = Mutate(nexGen, mutationChance, randomGen);
+                        auto nexGen = CrossOver(pairs, *curGen, mutationChance, randomGen);
                         Population* newPop = new Population;
-                        newPop->mMembers = mutated.mMembers;
+                        newPop->mMembers = nexGen.mMembers;
 
                         delete generations[i];
                         return newPop;
                     });
     WriteGen(*generations[generations.size()-1], gens);
     auto fitnesses = CalcFitness(*generations[generations.size()-1], locations);
+    WriteFit(fitnesses);
     auto solution = GetSolution(fitnesses);
     WriteSolution(solution, *generations[generations.size()-1], locations);
     

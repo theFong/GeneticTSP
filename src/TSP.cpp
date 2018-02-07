@@ -277,15 +277,15 @@ void WritePair(const std::vector<std::pair<int, int>> &pairs)
     }
 }
 
-Population CrossOver(const std::vector<std::pair<int, int>> &pairs,const Population &pop, std::mt19937 &gen)
+Population CrossOver(const std::vector<std::pair<int, int>> &pairs,const Population &pop, int mutationChance, std::mt19937 &gen)
 {
     Population newPop;
     newPop.mMembers = std::vector<std::vector<int>>(pop.mMembers.size());
     
     std::transform(pairs.begin(), pairs.end(), newPop.mMembers.begin(),
-                   [&gen, pop](std::pair<int, int> inPair) -> std::vector<int>
+                   [&gen, pop, mutationChance](std::pair<int, int> inPair) -> std::vector<int>
                    {
-                       std::uniform_int_distribution<int> uDis(1,pop.mMembers.size()-2);
+                       std::uniform_int_distribution<int> uDis(1,pop.mMembers[0].size()-2);
                        std::uniform_int_distribution<int> zeroOneUDis(0,1);
                        
                        int crossIndex = uDis(gen);
@@ -297,7 +297,9 @@ Population CrossOver(const std::vector<std::pair<int, int>> &pairs,const Populat
                        {
                            parent1 = inPair.first;
                            parent2 = inPair.second;
-                       } else {
+                       }
+                       else
+                       {
                            parent1 = inPair.second;
                            parent2 = inPair.first;
                        }
@@ -311,32 +313,29 @@ Population CrossOver(const std::vector<std::pair<int, int>> &pairs,const Populat
                                         // make sure its not in list
                                         return std::find(child.begin(), child.end(), loc) == child.end();
                                     });
+                       
+                       child = Mutate(child, mutationChance, gen);
                        return child;
                    });
     return newPop;
 }
 
-Population Mutate(const Population &pop, int mutationChance, std::mt19937 &gen)
+std::vector<int> Mutate(const std::vector<int> &mem, int mutationChance, std::mt19937 &gen)
 {
-    Population mutatedPop = pop;
+    std::vector<int> copyMem = mem;
     double mutationThresh = double(mutationChance)/100.0;
     
-    std::for_each(mutatedPop.mMembers.begin(), mutatedPop.mMembers.end(),
-                  [&gen, mutationThresh](std::vector<int> mem) -> std::vector<int>
-                  {
-                      std::uniform_real_distribution<double> uDis(0.0,1.0);
-                      double mutateVal = uDis(gen);
-                      if (mutateVal <= mutationThresh) {
-                          std::uniform_int_distribution<int> uDis(1,mem.size()-1);
-                          int firstInd = uDis(gen);
-                          int secondInd = uDis(gen);
-                          std::swap(mem[firstInd], mem[secondInd]);
-                      }
-                      return mem;
-                  });
+    std::uniform_real_distribution<double> uDis(0.0,1.0);
+    double mutateVal = uDis(gen);
+    if (mutateVal <= mutationThresh)
+    {
+      std::uniform_int_distribution<int> uDis(1,mem.size()-1);
+      int firstInd = uDis(gen);
+      int secondInd = uDis(gen);
+      std::swap(copyMem[firstInd], copyMem[secondInd]);
+    }
     
-    
-    return mutatedPop;
+    return copyMem;
 }
 
 std::pair<int, double> GetSolution(const std::vector<std::pair<int, double>> &fitnesses)
@@ -364,7 +363,7 @@ void WriteSolution(const std::pair<int, double> &solution,const Population &pop,
             
             oFile << locs[pop.mMembers[solution.first][i]].mName << "\n";
         }
-        
+        oFile << locs[pop.mMembers[solution.first][0]].mName << "\n";
         oFile << "DISTANCE: " << solution.second << " " << "miles";
         oFile.close();
     }
