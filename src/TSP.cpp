@@ -81,10 +81,10 @@ void WriteGen(const Population &pop, int gen)
     if (gen == 0)
     {
         genString = "INITIAL POPULATION:";
-        oFile = std::ofstream("log.txt", std::ofstream::out|std::ofstream::trunc);
+        oFile.open("log.txt", std::ofstream::out|std::ofstream::trunc);
     } else
     {
-        oFile = std::ofstream("log.txt", std::ofstream::out|std::ofstream::app);
+        oFile.open("log.txt", std::ofstream::out|std::ofstream::app);
     }
 
     
@@ -136,7 +136,7 @@ void WriteFit(const std::vector<std::pair<int, double>> &fitnesses)
     std::ofstream oFile;
     std::string fitnessStr = "FITNESS: ";
     
-    oFile = std::ofstream("log.txt", std::ofstream::out|std::ofstream::app);
+    oFile.open("log.txt", std::ofstream::out|std::ofstream::app);
     
     
     if (oFile.is_open())
@@ -262,7 +262,7 @@ void WritePair(const std::vector<std::pair<int, int>> &pairs)
     std::ofstream oFile;
     std::string pairStr = "SELECTED PAIRS:";
     
-    oFile = std::ofstream("log.txt", std::ofstream::out|std::ofstream::app);
+    oFile.open("log.txt", std::ofstream::out|std::ofstream::app);
     
     
     if (oFile.is_open())
@@ -352,7 +352,7 @@ void WriteSolution(const std::pair<int, double> &solution,const Population &pop,
     std::ofstream oFile;
     std::string solStr = "SOLUTION:";
     
-    oFile = std::ofstream("log.txt", std::ofstream::out|std::ofstream::app);
+    oFile.open("log.txt", std::ofstream::out|std::ofstream::app);
     
     
     if (oFile.is_open())
