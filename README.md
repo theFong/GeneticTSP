@@ -1,10 +1,3 @@
-# ITP 435 PA2 - Fall 2017 #
+# GeneticTSP
 
-### EDIT BELOW ###
-Name: Tommy Trojan
-
-Email: ttrojan@usc.edu
-
-Section: [M/W or T/TH]
-
-Platform: [PC/MAC]
+This repository is designed as platform to learn more about genetic algorithms and functional programming. 
